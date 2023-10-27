@@ -1,2 +1,2 @@
 # next-demo
-A demo repository width nextjs
+A demo repository with nextjs

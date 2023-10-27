@@ -12,7 +12,8 @@ export default function Home() {
     (image, index) => ({
       src: `/images/${image}`,
       width: 0,
-      height: 0
+      height: 0,
+      hide: true
     })
   )
   return (

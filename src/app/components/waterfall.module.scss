@@ -8,4 +8,7 @@
 .img {
   height: auto !important;
   position: absolute;
+  &.hide {
+    opacity: 0;
+  }
 }

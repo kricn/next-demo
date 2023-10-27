@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './waterfall.module.scss'
 
 /** 图片信息 */
@@ -7,6 +7,7 @@ interface WaterfallItem {
   src: string
   width: number
   height: number
+  hide: boolean
 }
 
 /** 瀑布流组件props */
@@ -28,6 +29,26 @@ const Waterfall = (props: WaterfallProps) => {
 
   const columnsHeight = new Array(columns).fill(0);
   let minCol = 0;
+
+  function isContain(dom: HTMLElement) {
+    const totalHeight = window.innerHeight || document.documentElement.clientHeight;
+    const totalWidth = window.innerWidth || document.documentElement.clientWidth;
+    // 当滚动条滚动时，top, left, bottom, right时刻会发生改变。
+    const { top, right, bottom, left } = dom.getBoundingClientRect();
+    console.log(dom)
+    console.log(dom.getBoundingClientRect())
+    return (top >= 0 && left >= 0 && right <= totalWidth && bottom <= totalHeight);
+  }
+
+  function handleScroll() {
+    const imgs = document.querySelectorAll('img');
+    for (let i = 0; i < imgs.length; i++) {
+      console.log(items[i])
+      if (!items[i] || !items[i]?.hide) break ;
+      const img = imgs[i]
+      items[i].hide = !isContain(img);
+    }
+  }
   
   useEffect(() => {
     if (initialized.current) return ;
@@ -46,6 +67,11 @@ const Waterfall = (props: WaterfallProps) => {
       // 更新最小列
       minCol = columnsHeight.indexOf(Math.min(...columnsHeight))
     }
+    document.addEventListener('scroll', handleScroll)
+    handleScroll()
+    return () => {
+      document.removeEventListener('scroll', handleScroll)
+    }
   }, [])
 
   return (
@@ -56,7 +82,7 @@ const Waterfall = (props: WaterfallProps) => {
             key={index}
             src={img.src} 
             width={itemWidth} 
-            className={styles.img}
+            className={`${styles.img} ${img.hide ? styles.hide : ''}`}
             id={`img-${index}`}
           />
         ))

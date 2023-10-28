@@ -1,25 +1,8 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import styles from './waterfall.module.scss'
+import { WaterfallItem, WaterfallProps } from '../page';
 
-/** 图片信息 */
-interface WaterfallItem {
-  src: string
-  width: number
-  height: number
-  hide: boolean
-}
-
-/** 瀑布流组件props */
-interface WaterfallProps {
- items: WaterfallItem[]
- /** 每一项的宽度 */
- itemWidth: number
- /** 列数 */
- columns: number
- rowGap?: number
- colGap?: number
-}
 
 /** 底部预留高度，表示距离底部还剩多少距离时开始显示图片 */
 const remainHeight = 50
@@ -67,11 +50,14 @@ const Waterfall = (props: WaterfallProps) => {
     }
   }
   
+  
   /** 组件初始化 */
   useEffect(() => {
+    const previewNode = document.querySelector('.preview-img') as HTMLDivElement
     if (initialized.current) {
       return () => {
         document.removeEventListener('scroll', handleScroll)
+        previewNode.removeEventListener('click', onImageClose)
       }
     };
     initialized.current = true;
@@ -97,7 +83,25 @@ const Waterfall = (props: WaterfallProps) => {
     document.addEventListener('scroll', handleScroll)
     /** 刚开始时，自动调用一次滚动函数 */
     handleScroll()
+
+    previewNode.addEventListener('click', onImageClose)
   }, [])
+
+  function onImageClick(img: WaterfallItem) {
+    const previewNode = document.querySelector('.preview-img') as HTMLDivElement
+    const imgNode = previewNode.querySelector('#img') as HTMLImageElement
+    console.log(previewNode, imgNode)
+    imgNode.src = img.src
+    previewNode.classList.add('show')
+    document.body.style.overflow = 'hidden'
+  }
+
+  /** 图片关闭 */
+  function onImageClose() {
+    const previewNode = document.querySelector('.preview-img') as HTMLDivElement
+    previewNode.classList.remove('show')
+    document.body.style.overflow = 'auto'
+  }
 
   return (
     <div className={styles.container}>
@@ -109,6 +113,7 @@ const Waterfall = (props: WaterfallProps) => {
             width={itemWidth} 
             className={`${styles.img} ${img.hide ? styles.hide : ''}`}
             id={`img-${index}`}
+            onClick={() => onImageClick(img)}
           />
         ))
       }
